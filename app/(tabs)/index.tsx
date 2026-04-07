@@ -1,17 +1,30 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import MapView, { Marker } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { Navigation, Clock, CheckCircle } from 'lucide-react-native';
+import { getBookings, Mission } from '@/lib/api';
 
 export default function TechHubScreen() {
   const router = useRouter();
-  
-  const activeMissions = [
-    { id: '1', client: 'Aïcha', vehicle: 'Toyota RAV4', time: '14:00', status: 'En attente', lat: 6.3653, lng: 2.4183 },
-    { id: '2', client: 'Marc', vehicle: 'Hyundai Tucson', time: '16:30', status: 'En attente', lat: 6.3700, lng: 2.4200 },
-  ];
+  const [activeMissions, setActiveMissions] = useState<Mission[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadMissions = useCallback(async () => {
+    try {
+      setError(null);
+      const bookings = await getBookings();
+      setActiveMissions(bookings);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Impossible de charger les missions.';
+      setError(message);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadMissions();
+  }, [loadMissions]);
 
   return (
     <View style={styles.container}>
@@ -25,12 +38,12 @@ export default function TechHubScreen() {
             longitudeDelta: 0.05,
           }}
         >
-          {activeMissions.map((mission) => (
+          {activeMissions.map((mission, idx) => (
             <Marker
               key={mission.id}
-              coordinate={{ latitude: mission.lat, longitude: mission.lng }}
-              title={mission.client}
-              description={mission.vehicle}
+              coordinate={{ latitude: 6.3653 + idx * 0.002, longitude: 2.4183 + idx * 0.002 }}
+              title={`Mission #${mission.id}`}
+              description={mission.address}
             />
           ))}
         </MapView>
@@ -38,25 +51,26 @@ export default function TechHubScreen() {
 
       <View style={styles.bottomSheet}>
         <Text style={styles.sheetTitle}>File du jour ({activeMissions.length})</Text>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
         
         <FlatList
           data={activeMissions}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ paddingBottom: Spacing.xl }}
           renderItem={({ item }) => (
             <TouchableOpacity 
               style={styles.missionCard}
-              onPress={() => router.push(`/mission/${item.id}`)}
+              onPress={() => router.push(`/mission/${String(item.id)}`)}
               activeOpacity={0.8}
             >
               <View style={styles.missionHeader}>
-                <Text style={styles.clientName}>{item.client}</Text>
+                <Text style={styles.clientName}>Mission #{item.id}</Text>
                 <View style={styles.timeBadge}>
                   <Clock size={12} color={Colors.accent} />
-                  <Text style={styles.timeText}>{item.time}</Text>
+                  <Text style={styles.timeText}>{new Date(item.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</Text>
                 </View>
               </View>
-              <Text style={styles.vehicleText}>{item.vehicle}</Text>
+              <Text style={styles.vehicleText}>{item.address}</Text>
               
               <View style={styles.cardFooter}>
                 <View style={styles.statusBadge}>
@@ -92,4 +106,5 @@ const styles = StyleSheet.create({
   statusText: { fontFamily: 'RightGrotesk', fontSize: 14, color: Colors.text.primary },
   navigateButton: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.text.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: Radius.sm },
   navigateText: { color: '#FFFFFF', fontFamily: 'RightGrotesk', fontSize: 14, fontWeight: 'bold' },
+  errorText: { fontFamily: 'RightGrotesk', color: Colors.error, marginBottom: Spacing.sm },
 });

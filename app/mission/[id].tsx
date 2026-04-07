@@ -1,16 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { Button } from '@/components/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Camera, Phone, CheckSquare } from 'lucide-react-native';
+import { getBooking, sendTechnicianLocation, updateBookingStatus } from '@/lib/api';
 
 export default function MissionDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   
   const [status, setStatus] = useState<'pending'|'en_route'|'on_site'|'washing'|'completed'>('pending');
+  const [address, setAddress] = useState('Chargement...');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        if (!id) return;
+        const booking = await getBooking(String(id));
+        setAddress(booking.address || 'Adresse indisponible');
+        if (['pending', 'en_route', 'on_site', 'washing', 'completed'].includes(booking.status)) {
+          setStatus(booking.status as 'pending' | 'en_route' | 'on_site' | 'washing' | 'completed');
+        }
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Impossible de charger la mission.';
+        setError(message);
+      }
+    };
+    void load();
+  }, [id]);
 
   const getNextAction = () => {
     switch (status) {
@@ -25,11 +46,24 @@ export default function MissionDetailScreen() {
 
   const currentAction = getNextAction();
 
-  const handleAction = () => {
+  const handleAction = async () => {
     if (currentAction.next === 'done') {
       router.back();
     } else {
-      setStatus(currentAction.next as any);
+      setLoading(true);
+      setError(null);
+      try {
+        if (id) {
+          await updateBookingStatus(String(id), currentAction.next);
+          await sendTechnicianLocation({ booking_id: Number(id), lat: 6.367, lng: 2.419 });
+        }
+        setStatus(currentAction.next as 'pending' | 'en_route' | 'on_site' | 'washing' | 'completed');
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Mise à jour impossible.';
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -47,11 +81,12 @@ export default function MissionDetailScreen() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.infoCard}>
-          <Text style={styles.clientName}>Aïcha</Text>
-          <Text style={styles.vehicleInfo}>Toyota RAV4 - Grise</Text>
+          <Text style={styles.clientName}>Mission terrain</Text>
+          <Text style={styles.vehicleInfo}>Véhicule client</Text>
           <Text style={styles.plateInfo}>Immatriculation : BJ-4523-RB</Text>
-          <Text style={styles.address}>Haie Vive, Rue 234, Cotonou</Text>
+          <Text style={styles.address}>{address}</Text>
         </View>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <Text style={styles.sectionTitle}>État de l'intervention</Text>
         
@@ -105,6 +140,7 @@ export default function MissionDetailScreen() {
           title={currentAction.title}
           onPress={handleAction} 
           variant={currentAction.variant as any} 
+          loading={loading}
         />
       </View>
     </SafeAreaView>
@@ -136,4 +172,5 @@ const styles = StyleSheet.create({
   toolTitle: { fontFamily: 'RightGrotesk', fontSize: 16, fontWeight: 'bold', color: Colors.text.primary },
   toolDesc: { fontFamily: 'RightGrotesk', fontSize: 12, color: Colors.text.secondary },
   footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.xl, backgroundColor: Colors.background, borderTopWidth: 1, borderTopColor: Colors.border },
+  errorText: { fontFamily: 'RightGrotesk', color: Colors.error, marginBottom: Spacing.md },
 });
