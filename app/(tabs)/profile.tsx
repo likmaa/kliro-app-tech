@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Spacing, Typography } from '@/constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
@@ -17,6 +17,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   container: { padding: Spacing.xl },
-  title: { fontFamily: 'Tusker', fontSize: 32, marginBottom: Spacing.xl, color: Colors.text.primary },
-  emptyText: { fontFamily: 'RightGrotesk', fontSize: 16, color: Colors.text.secondary },
+  title: { fontFamily: 'RightGrotesk', fontSize: Typography.title, lineHeight: Typography.titleLineHeight, marginBottom: Spacing.xl, color: Colors.text.primary },
+  emptyText: { fontFamily: 'RightGrotesk', fontSize: Typography.emptyText, color: Colors.text.secondary },
 });

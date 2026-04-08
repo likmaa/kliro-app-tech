@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Glass } from '@/constants/theme';
 import { Button } from '@/components/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Camera, Phone, CheckSquare } from 'lucide-react-native';
@@ -88,7 +88,7 @@ export default function MissionDetailScreen() {
         </View>
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <Text style={styles.sectionTitle}>État de l'intervention</Text>
+        <Text style={styles.sectionTitle}>État de l&apos;intervention</Text>
         
         <View style={styles.statusTimeline}>
           {['pending', 'en_route', 'on_site', 'washing', 'completed'].map((step, idx) => {
@@ -154,8 +154,8 @@ const styles = StyleSheet.create({
   phoneButton: { padding: Spacing.xs, backgroundColor: Colors.surface, borderRadius: 20 },
   headerTitle: { fontFamily: 'RightGrotesk', fontSize: 16, fontWeight: 'bold', color: Colors.text.primary },
   container: { padding: Spacing.xl, paddingBottom: 100 },
-  infoCard: { backgroundColor: Colors.surface, padding: Spacing.lg, borderRadius: Radius.md, marginBottom: Spacing.xl },
-  clientName: { fontFamily: 'Tusker', fontSize: 24, color: Colors.text.primary, marginBottom: 4 },
+  infoCard: { ...Glass.card, padding: Spacing.lg, borderRadius: Radius.md, marginBottom: Spacing.xl },
+  clientName: { fontFamily: 'RightGrotesk', fontSize: 24, color: Colors.text.primary, marginBottom: 4 },
   vehicleInfo: { fontFamily: 'RightGrotesk', fontSize: 16, color: Colors.text.secondary, marginBottom: 4 },
   plateInfo: { fontFamily: 'RightGrotesk', fontSize: 14, fontWeight: 'bold', color: Colors.text.primary, marginBottom: 8 },
   address: { fontFamily: 'RightGrotesk', fontSize: 14, color: Colors.text.secondary },
@@ -168,9 +168,9 @@ const styles = StyleSheet.create({
   timelineTextActive: { color: Colors.text.primary, fontWeight: 'bold' },
   toolsSection: { marginTop: Spacing.lg },
   toolButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, padding: Spacing.md, borderRadius: Radius.md, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  toolIconWrapper: { backgroundColor: '#f0fdf4', padding: Spacing.sm, borderRadius: Radius.sm, marginRight: Spacing.md },
+  toolIconWrapper: { backgroundColor: Colors.accentMuted, padding: Spacing.sm, borderRadius: Radius.sm, marginRight: Spacing.md },
   toolTitle: { fontFamily: 'RightGrotesk', fontSize: 16, fontWeight: 'bold', color: Colors.text.primary },
   toolDesc: { fontFamily: 'RightGrotesk', fontSize: 12, color: Colors.text.secondary },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.xl, backgroundColor: Colors.background, borderTopWidth: 1, borderTopColor: Colors.border },
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.xl, ...Glass.footer },
   errorText: { fontFamily: 'RightGrotesk', color: Colors.error, marginBottom: Spacing.md },
 });

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity } from 'react-native';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, Glass } from '@/constants/theme';
 import MapView, { Marker } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { Navigation, Clock, CheckCircle } from 'lucide-react-native';
@@ -93,12 +93,23 @@ export default function TechHubScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   mapContainer: { flex: 1 },
-  bottomSheet: { height: '50%', backgroundColor: Colors.background, borderTopLeftRadius: Radius.lg, borderTopRightRadius: Radius.lg, padding: Spacing.lg, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 },
-  sheetTitle: { fontFamily: 'Tusker', fontSize: 24, color: Colors.text.primary, marginBottom: Spacing.md },
-  missionCard: { backgroundColor: Colors.surface, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.border },
+  bottomSheet: {
+    height: '50%',
+    borderTopLeftRadius: Radius.lg,
+    borderTopRightRadius: Radius.lg,
+    padding: Spacing.lg,
+    ...Glass.sheet,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  sheetTitle: { fontFamily: 'RightGrotesk', fontSize: Typography.title, lineHeight: Typography.titleLineHeight, color: Colors.text.primary, marginBottom: Spacing.md },
+  missionCard: { ...Glass.card, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md },
   missionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
   clientName: { fontFamily: 'RightGrotesk', fontSize: 18, fontWeight: 'bold', color: Colors.text.primary },
-  timeBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#f0fdf4', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+  timeBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.accentMuted, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
   timeText: { fontFamily: 'RightGrotesk', fontSize: 12, fontWeight: 'bold', color: Colors.accent },
   vehicleText: { fontFamily: 'RightGrotesk', fontSize: 16, color: Colors.text.secondary, marginBottom: Spacing.md },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

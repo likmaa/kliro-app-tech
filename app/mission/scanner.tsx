@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';

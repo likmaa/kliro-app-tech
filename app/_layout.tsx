@@ -17,7 +17,6 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    'Tusker': require('../assets/fonts/TuskerGrotesk-7700Bold.otf'),
     'RightGrotesk': require('../assets/fonts/RightGrotesk-Medium.otf'),
   });
 
