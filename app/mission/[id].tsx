@@ -15,6 +15,12 @@ export default function MissionDetailScreen() {
   const [address, setAddress] = useState('Chargement...');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checklist, setChecklist] = useState({
+    pneus: false,
+    carrosserie: false,
+    interieur: false,
+  });
+  const [photosTaken, setPhotosTaken] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -37,7 +43,15 @@ export default function MissionDetailScreen() {
     switch (status) {
       case 'pending': return { title: 'Partir vers le client', next: 'en_route' as const, variant: 'primary' };
       case 'en_route': return { title: 'Je suis sur place', next: 'on_site' as const, variant: 'secondary' };
-      case 'on_site': return { title: 'Démarrer le lavage', next: 'washing' as const, variant: 'primary' };
+      case 'on_site': {
+        const canStart = checklist.pneus && checklist.carrosserie && checklist.interieur && photosTaken >= 2;
+        return { 
+          title: canStart ? 'Démarrer le lavage' : 'Compléter le protocole', 
+          next: 'washing' as const, 
+          variant: 'primary',
+          disabled: !canStart
+        };
+      }
       case 'washing': return { title: "Terminer l'intervention", next: 'completed' as const, variant: 'primary' };
       case 'completed': return { title: 'Retour au Hub', next: 'done' as const, variant: 'secondary' };
       default: return { title: 'Retour', next: 'done' as const, variant: 'ghost' };
@@ -48,13 +62,18 @@ export default function MissionDetailScreen() {
 
   const handleAction = async () => {
     if (currentAction.next === 'done') {
-      router.back();
+      router.replace('/(tabs)/planning');
     } else {
+      if ((currentAction as any).disabled) {
+        setError("Veuillez remplir la checklist et prendre au moins 2 photos.");
+        return;
+      }
       setLoading(true);
       setError(null);
       try {
         if (id) {
           await updateBookingStatus(String(id), currentAction.next);
+          // Simulation de position
           await sendTechnicianLocation({ booking_id: Number(id), lat: 6.367, lng: 2.419 });
         }
         setStatus(currentAction.next as 'pending' | 'en_route' | 'on_site' | 'washing' | 'completed');
@@ -65,6 +84,15 @@ export default function MissionDetailScreen() {
         setLoading(false);
       }
     }
+  };
+
+  const toggleCheck = (key: keyof typeof checklist) => {
+    setChecklist(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const takePhoto = () => {
+    // Simulation
+    setPhotosTaken(prev => prev + 1);
   };
 
   return (
@@ -88,11 +116,11 @@ export default function MissionDetailScreen() {
         </View>
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <Text style={styles.sectionTitle}>État de l&apos;intervention</Text>
+        <Text style={styles.sectionTitle}>État de l'intervention</Text>
         
         <View style={styles.statusTimeline}>
           {['pending', 'en_route', 'on_site', 'washing', 'completed'].map((step, idx) => {
-            const stepNames = ['En file', 'En route', 'Sur place', 'Lavage en cours', 'Terminé'];
+            const stepNames = ['En file', 'En route', 'Sur place', 'Lavage', 'Terminé'];
             const isActive = status === step;
             const isPassed = ['pending', 'en_route', 'on_site', 'washing', 'completed'].indexOf(status) > idx;
             
@@ -108,27 +136,27 @@ export default function MissionDetailScreen() {
         </View>
 
         {status === 'on_site' || status === 'washing' ? (
-          <View style={styles.toolsSection}>
-            <Text style={styles.sectionTitle}>Outils Techniques</Text>
+          <View style={styles.protocolSection}>
+            <Text style={styles.sectionTitle}>Protocole Obligatoire</Text>
             
-            <TouchableOpacity style={styles.toolButton} onPress={() => router.push('/mission/scanner')}>
-              <View style={styles.toolIconWrapper}>
-                <Camera size={24} color={Colors.accent} />
-              </View>
-              <View>
-                <Text style={styles.toolTitle}>Scanner la plaque</Text>
-                <Text style={styles.toolDesc}>Identifier formellement le véhicule</Text>
-              </View>
-            </TouchableOpacity>
+            <View style={styles.checklistCard}>
+              <TouchableOpacity style={styles.checkItem} onPress={() => toggleCheck('pneus')}>
+                <CheckSquare size={20} color={checklist.pneus ? Colors.accent : Colors.text.secondary} />
+                <Text style={[styles.checkText, checklist.pneus && styles.checkTextActive]}>État des pneus & jantes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.checkItem} onPress={() => toggleCheck('carrosserie')}>
+                <CheckSquare size={20} color={checklist.carrosserie ? Colors.accent : Colors.text.secondary} />
+                <Text style={[styles.checkText, checklist.carrosserie && styles.checkTextActive]}>Scan des rayures (Carrosserie)</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.checkItem} onPress={() => toggleCheck('interieur')}>
+                <CheckSquare size={20} color={checklist.interieur ? Colors.accent : Colors.text.secondary} />
+                <Text style={[styles.checkText, checklist.interieur && styles.checkTextActive]}>Intérieur : Objets de valeur</Text>
+              </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity style={styles.toolButton}>
-              <View style={styles.toolIconWrapper}>
-                <CheckSquare size={24} color={Colors.accent} />
-              </View>
-              <View>
-                <Text style={styles.toolTitle}>Check-list Dégâts</Text>
-                <Text style={styles.toolDesc}>Signaler une rayure préalable</Text>
-              </View>
+            <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
+              <Camera size={24} color={Colors.text.primary} />
+              <Text style={styles.photoButtonText}>Prendre une photo ({photosTaken}/4)</Text>
             </TouchableOpacity>
           </View>
         ) : null}
@@ -141,6 +169,7 @@ export default function MissionDetailScreen() {
           onPress={handleAction} 
           variant={currentAction.variant as any} 
           loading={loading}
+          disabled={(currentAction as any).disabled && status !== 'completed'}
         />
       </View>
     </SafeAreaView>
@@ -166,11 +195,45 @@ const styles = StyleSheet.create({
   timelineDotActive: { backgroundColor: Colors.accent },
   timelineText: { fontFamily: 'RightGrotesk', fontSize: 16, color: Colors.text.secondary },
   timelineTextActive: { color: Colors.text.primary, fontWeight: 'bold' },
-  toolsSection: { marginTop: Spacing.lg },
-  toolButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, padding: Spacing.md, borderRadius: Radius.md, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  toolIconWrapper: { backgroundColor: Colors.accentMuted, padding: Spacing.sm, borderRadius: Radius.sm, marginRight: Spacing.md },
-  toolTitle: { fontFamily: 'RightGrotesk', fontSize: 16, fontWeight: 'bold', color: Colors.text.primary },
-  toolDesc: { fontFamily: 'RightGrotesk', fontSize: 12, color: Colors.text.secondary },
+  protocolSection: { marginTop: Spacing.lg },
+  checklistCard: {
+    ...Glass.card,
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    marginBottom: Spacing.md,
+  },
+  checkItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.sm,
+  },
+  checkText: {
+    fontFamily: 'RightGrotesk',
+    fontSize: 16,
+    color: Colors.text.secondary,
+  },
+  checkTextActive: {
+    color: Colors.text.primary,
+    fontWeight: 'bold',
+  },
+  photoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  photoButtonText: {
+    fontFamily: 'RightGrotesk',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.text.primary,
+  },
   footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.xl, ...Glass.footer },
   errorText: { fontFamily: 'RightGrotesk', color: Colors.error, marginBottom: Spacing.md },
 });

@@ -19,9 +19,22 @@ export const Colors = {
 };
 
 export const Typography = {
-  title: 28,
-  titleLineHeight: 32,
-  emptyText: 14,
+  display: 34,
+  h1: 28,
+  h2: 22,
+  h3: 18,
+  bodyLarge: 16,
+  bodyMain: 14,
+  caption: 12,
+  lineHeight: {
+    display: 40,
+    h1: 32,
+    h2: 28,
+    h3: 24,
+    bodyLarge: 24,
+    bodyMain: 20,
+    caption: 16,
+  }
 };
 
 export const Glass = {
@@ -29,11 +42,13 @@ export const Glass = {
     backgroundColor: 'rgba(255, 255, 255, 0.88)',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.65)',
+    blur: 10,
   },
   card: {
     backgroundColor: 'rgba(255, 255, 255, 0.72)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.85)',
+    blur: 6,
   },
   footer: {
     backgroundColor: 'rgba(255, 255, 255, 0.92)',
@@ -55,4 +70,5 @@ export const Radius = {
   sm: 4,
   md: 8,
   lg: 12,
+  full: 999,
 };

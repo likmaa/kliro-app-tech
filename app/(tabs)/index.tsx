@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  sheetTitle: { fontFamily: 'RightGrotesk', fontSize: Typography.title, lineHeight: Typography.titleLineHeight, color: Colors.text.primary, marginBottom: Spacing.md },
+  sheetTitle: { fontFamily: 'RightGrotesk', fontSize: Typography.h1, lineHeight: Typography.lineHeight.h1, color: Colors.text.primary, marginBottom: Spacing.md },
   missionCard: { ...Glass.card, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md },
   missionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
   clientName: { fontFamily: 'RightGrotesk', fontSize: 18, fontWeight: 'bold', color: Colors.text.primary },

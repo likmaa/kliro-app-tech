@@ -1,19 +1,19 @@
 import { StyleSheet, Text, type TextProps } from 'react-native';
 
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { Colors } from '@/constants/theme';
+import { Typography } from '@/constants/theme';
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  type?: 'display' | 'h1' | 'h2' | 'h3' | 'bodyLarge' | 'bodyMain' | 'caption' | 'link';
 };
 
 export function ThemedText({
   style,
   lightColor,
   darkColor,
-  type = 'default',
+  type = 'bodyMain',
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
@@ -22,11 +22,7 @@ export function ThemedText({
     <Text
       style={[
         { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
+        styles[type],
         style,
       ]}
       {...rest}
@@ -35,32 +31,54 @@ export function ThemedText({
 }
 
 const styles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
+  display: {
+    fontSize: Typography.display,
+    lineHeight: Typography.lineHeight.display,
     fontFamily: 'RightGrotesk',
+    fontWeight: '700',
   },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
+  h1: {
+    fontSize: Typography.h1,
+    lineHeight: Typography.lineHeight.h1,
+    fontFamily: 'RightGrotesk',
+    fontWeight: '700',
+  },
+  h2: {
+    fontSize: Typography.h2,
+    lineHeight: Typography.lineHeight.h2,
+    fontFamily: 'RightGrotesk',
     fontWeight: '600',
-    fontFamily: 'RightGrotesk',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    lineHeight: 32,
+  h3: {
+    fontSize: Typography.h3,
+    lineHeight: Typography.lineHeight.h3,
     fontFamily: 'RightGrotesk',
+    fontWeight: '600',
   },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  bodyLarge: {
+    fontSize: Typography.bodyLarge,
+    lineHeight: Typography.lineHeight.bodyLarge,
     fontFamily: 'RightGrotesk',
+    fontWeight: '500',
+  },
+  bodyMain: {
+    fontSize: Typography.bodyMain,
+    lineHeight: Typography.lineHeight.bodyMain,
+    fontFamily: 'RightGrotesk',
+    fontWeight: '500',
+  },
+  caption: {
+    fontSize: Typography.caption,
+    lineHeight: Typography.lineHeight.caption,
+    fontFamily: 'RightGrotesk',
+    fontWeight: '500',
   },
   link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: Colors.accent,
+    fontSize: Typography.bodyMain,
+    lineHeight: Typography.lineHeight.bodyMain,
+    color: '#03B5AA',
     fontFamily: 'RightGrotesk',
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
 });
